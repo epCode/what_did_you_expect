@@ -7,12 +7,13 @@ local texthud = {
 }
 local indexin = 1
 local button_pressed = {}
+-- Yes, I know my formating is amazing.. I had only like a day and a half to make this.
 
 dofile(minetest.get_modpath("default").."/torch.lua")
 
 dialoge = { -- I can't spell
-  {"You win!!", 0.02, 3},
-  {"Yay!", 0.02, 3},
+  {"You win!!", 0.02, 7}, -- {string_to_print, average_delay_in_seconds_between_each_char_typed, text scale}
+  {"Yay!", 0.02, 5},
   {"...", 0.04, 3},
   {"Bye-bye now!", 0.02, 3},
   {"..", 0.04, 3},
@@ -25,21 +26,20 @@ dialoge = { -- I can't spell
   {"You anticipated something other than what you got", 0.02, 3},
   {"Right?", 0.04, 3},
   {"You know, some would call that sort of thing...", 0.02, 3},
-  {"...", 0.02, 3},
-  {".....", 0.02, 3},
-  {"........", 0.02, 3},
-  {"Unexpected", 0.1, 3},
+  {"...", 0.07, 3},
+  {".....", 0.07, 3},
+  {"........", 0.07, 3},
+  {"Unexpected", 0.1, 4},
   {":)", 0.05, 3},
-  {".", 0.02, 3},
-  {".", 0.02, 3},
-  {".", 0.02, 3},
-  {".", 0.02, 3},
+  {"..", 0.1, 3},
+  {"..", 0.1, 3},
   {"Seriously?", 0.02, 3},
   {"Why? Arent you bored already?", 0.02, 3},
   {"Well I'm tired, leave me alone, please.", 0.02, 3},
-  {":|", 0.02, 3},
+  {":|", 0.02, 4},
   {"Roses are red,", 0.02, 3},
   {"Violets are blue,", 0.02, 3},
+  {"..", 0.1, 3},
   {"._.", 0.02, 3},
   {"That it, thats the whole thing.", 0.02, 3},
   {"My own composition I might add.", 0.02, 3},
@@ -49,21 +49,22 @@ dialoge = { -- I can't spell
   {"Listen, can you please just go check out another game entry?", 0.02, 3},
   {"I hear Jordan is doing something interesting.", 0.02, 3},
   {"Perhaps Wuzzy will win again, if he's entering.", 0.02, 3},
-  {"..", 0.02, 3},
-  {"..", 0.02, 3},
-  {"Boo!", 0.02, 3},
+  {"...", 0.1, 3},
+  {"...", 0.1, 3},
+  {"Boo!", 0.02, 10},
   {"Go Away.", 1, 3},
-  {"Ok, you asked for it...", 0.05, 3},
-  {"You actually lose!", 0.05, 3},
-  {"Now you feel bad huh!?", 0.02, 3},
+  {"Ok, you asked for it...", 0.05, 5},
+  {"You actually lose!", 0.05, 8},
+  {"Now you feel bad huh!?", 0.02, 6},
   {"Wait, y-you don't?", 0.02, 3},
   {"You don't care?", 0.2, 3},
-  {"Oh.", 0.1, 3},
-  {"That makes me..", 0.05, 3},
-  {"sad", 0.16, 3},
-  {"I think I might", 0.07, 3},
-  {"cry :(", 0.07, 3},
-  {"Bye, I will leave now", 0.07, 3},
+  {"Oh.", 0.1, 1},
+  {"That makes me..", 0.05, 2},
+  {"sad", 0.16, 1},
+  {"I think I might", 0.07, 2},
+  {"cry :(", 0.07, 1},
+  {"Thank you for at least talking to me.", 0.1, 3},
+  {"I must begone, farewell. I guess I deserve this for such a disappointing surprise", 0.1, 3},
 }
 
 local function printf(player, text, delay, scale)
@@ -83,6 +84,7 @@ end
 
 minetest.register_node("default:node", {
   tiles = {"brick.png"},
+  sounds = {footstep = "footstep"},
 })
 minetest.register_node("default:lever", {
   tiles = {"lever.png"},
@@ -99,10 +101,21 @@ minetest.register_node("default:lever", {
         gain = 1})
     minetest.set_node(pos, {name="default:lever_off"})
     minetest.after(1, function()
+      clicker:set_pos(vector.new(0,0,100))
       button_pressed[clicker] = true
       clicker:hud_add({
         hud_elem_type = "image",
-        text = "black.png",
+        text = "black_top.png",
+        position = {x=0.5,y=0},
+        offset = {x=0,y=310},
+        scale = {x=10, y=10},
+        z_index = 100,
+      })
+      clicker:hud_add({
+        hud_elem_type = "image",
+        text = "black_bottom.png",
+        position = {x=0.5,y=1},
+        offset = {x=0,y=-310},
         scale = {x=10, y=10},
         z_index = 100,
       })
@@ -186,7 +199,7 @@ minetest.hud_replace_builtin("health",	{
 
 
 minetest.register_on_joinplayer(function(player)
-  player:get_inventory():set_size("main", 1)
+  player:get_inventory():set_size("main", 8)
   player:get_inventory():set_size("craft", 0)
 
   player:set_wielded_item(ItemStack("default:torch"))
@@ -197,6 +210,8 @@ minetest.register_on_joinplayer(function(player)
   end)
   --[[
   ]]
+  player:hud_set_hotbar_image("gui_hotbar.png")
+  player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
 end)
 
 controls.register_on_press(function(player)
