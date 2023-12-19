@@ -37,6 +37,7 @@ dialoge = { -- I can't spell
   {"Why? Arent you bored already?", 0.02, 3},
   {"Well I'm tired, leave me alone, please.", 0.02, 3},
   {":|", 0.02, 4},
+  {"I have a poem for you;", 0.02, 3},
   {"Roses are red,", 0.02, 3},
   {"Violets are blue,", 0.02, 3},
   {"..", 0.1, 3},
