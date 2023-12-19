@@ -42,7 +42,7 @@ dialoge = { -- I can't spell
   {"Violets are blue,", 0.02, 3},
   {"..", 0.1, 3},
   {"._.", 0.02, 3},
-  {"That it, thats the whole thing.", 0.02, 3},
+  {"That it, thats the whole peom..", 0.02, 3},
   {"My own composition I might add.", 0.02, 3},
   {"What's that? I didn't finish it?", 0.02, 3},
   {"So you expected then for me to-", 0.02, 3},
@@ -82,6 +82,8 @@ local function finished_typing(player)
     return true
   end
 end
+
+
 
 minetest.register_node("default:node", {
   tiles = {"brick.png"},
@@ -199,7 +201,17 @@ minetest.hud_replace_builtin("health",	{
 })
 
 
+theme_inv = [[
+size[9,5]
+style_type[label;font=bold;border=false]
+list[current_player;main;0.5,2.1;8,1;]
+label[2.75,3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "It looks like you don't have much"))..[[]
+label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "Might want to get some more!"))..[[]
+
+]]
+
 minetest.register_on_joinplayer(function(player)
+  player:set_inventory_formspec(theme_inv)
   player:get_inventory():set_size("main", 8)
   player:get_inventory():set_size("craft", 0)
 
@@ -211,15 +223,28 @@ minetest.register_on_joinplayer(function(player)
   end)
   --[[
   ]]
+
+  local formspec = [[
+			bgcolor[#080808BB;true]
+			listcolors[#beba94;#5A5A5A;#beba94;#beba94;#beba94] ]]
+	local name = player:get_player_name()
+	local info = minetest.get_player_information(name)
+	formspec = formspec .. "background[5,5;2,1;gui_formbg.png;true]"
+	player:set_formspec_prepend(formspec)
   player:hud_set_hotbar_image("gui_hotbar.png")
   player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
 end)
+
+
+local morse_message = ". .--. .. -.-. / .... .. -.. -.. . -. / -- . ... ... .- --. . .-.-.- / .... . .-.. .-.. --- / -. . .-. -.. .-.-.-"
 
 controls.register_on_press(function(player)
   if button_pressed[player] then
     local thing_to_do = dialoge[indexin]
     if not thing_to_do then
-      minetest.kick_player(player:get_player_name(), "My condolences, "..player:get_player_name().."; You finished the game with a loss. I'm sorry. Have a good day. Or a day anyway. -Seugy")
+      if finished_typing(player) and texthud.printed[player] ~= morse_message then
+        printf(player, morse_message, "fast", 1)
+      end
     end
     if not thing_to_do or not finished_typing(player) then return end
     indexin = indexin + 1
@@ -232,9 +257,22 @@ local timer = 0
 minetest.register_globalstep(function(dtime)
   timer = timer + dtime
   for _,player in pairs(minetest.get_connected_players()) do
+
     minetest.set_player_privs(player:get_player_name(), {fly=nil, fast = nil})
 
-    if timer+(math.random(-100,100)/100) < (texthud.delay[player] or 0) or not texthud.to_print[player] or not texthud.printed[player] then
+    if texthud.printed[player] and texthud.printed[player] == morse_message then
+      minetest.kick_player(player:get_player_name(), "My condolences, "..player:get_player_name().."; You finished the game with a loss. I'm sorry. Have a good day. Or a day anyway. -Seugy")
+    end
+
+    local delay = (texthud.delay[player] or 0)
+    local double = 1
+
+    if delay and delay == "fast" then
+      delay = 0
+      double = 10
+    end
+
+    if timer+(math.random(-100,100)/100) < delay or not texthud.to_print[player] or not texthud.printed[player] then
       break
     end
     timer = 0
@@ -243,10 +281,12 @@ minetest.register_globalstep(function(dtime)
       if texthud.id[player] then
         player:hud_remove(texthud.id[player])
       end
-      texthud.printed[player] = texthud.printed[player]..texthud.to_print[player]:sub(#texthud.printed[player]+1, #texthud.printed[player]+1)
-      minetest.sound_play("typesound", {
-          to_player = player:get_player_name(),
-          gain = 0.1})
+      texthud.printed[player] = texthud.printed[player]..texthud.to_print[player]:sub(#texthud.printed[player]+1, #texthud.printed[player]+double)
+      if double == 1 then
+        minetest.sound_play("typesound", {
+            to_player = player:get_player_name(),
+            gain = 0.1})
+      end
       texthud.id[player] = player:hud_add({
         hud_elem_type = "text",
         text = texthud.printed[player],
