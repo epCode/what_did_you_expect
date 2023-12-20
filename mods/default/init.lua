@@ -8,7 +8,6 @@ local texthud = {
 local indexin = 1
 local button_pressed = {}
 local player_in_end = {}
-local xphb = {}
 -- Yes, I know my formating is amazing.. I had only like a day and a half to make this.
 
 local helptext = [[
@@ -16,18 +15,11 @@ Hello! If you are new to Minetest or a long time user, I welcome you.
 When you are ready to play, pull the lever on the North wall. Have fun!!]]
 
 dofile(minetest.get_modpath("default").."/torch.lua")
+dofile(minetest.get_modpath("default").."/tools.lua")
+dofile(minetest.get_modpath("default").."/xp.lua")
 
 
-minetest.register_tool("default:stone_pick", {
-  description = "Stone Pickaxe\n"..minetest.colorize("#87433b", "A sturdy well crafted pick\npirmarily made for digging softer stone"),
-  inventory_image = "stone_pick.png",
-  wield_scale = {x=2,y=2,z=1.3},
-})
-minetest.register_tool("default:stone_dagger", {
-  description = "Stone Dagger\n"..minetest.colorize("#87433b", "A curiously sharp dagger made from stone"),
-  inventory_image = "stone_dagger.png",
-  wield_scale = {x=2,y=2,z=1.3},
-})
+
 
 
 dialoge = { -- I can't spell
@@ -99,66 +91,6 @@ local function show_help_form(player)
 end
 
 
-local function set_xp_hud(player, num)
-  num = num or 0
-  local meta = player:get_meta()
-  if meta:get_string("xp") == "" then -- first time player? give them 0 xp
-    meta:set_string("xp", tostring(num))
-  else
-    meta:set_string("xp", meta:get_string("xp")+num)
-  end
-  local xp = (tonumber(meta:get_string("xp"))/100)%10
-  if xphb[player] then -- make sure old hud is gone
-    for i=1, 5 do
-      player:hud_remove(xphb[player][i])
-    end
-  else
-    xphb[player] = {}
-  end
-  xphb[player][1]=player:hud_add({
-    hud_elem_type = "image",
-    text = "xpbar_under.png",
-    position = {x=0.5,y=0},
-    offset = {x=0,y=30},
-    scale = {x=10, y=10},
-    z_index = 9,
-  })
-
-  xphb[player][2]=player:hud_add({
-    hud_elem_type = "image",
-    text = "xpbar_inside.png",
-    position = {x=0.5,y=0},
-    offset = {x=-293+(xp*29),y=30},
-    scale = {x=xp, y=10},
-    z_index = 10,
-  })
-  xphb[player][3]=player:hud_add({
-    hud_elem_type = "image",
-    text = "xpbar.png",
-    position = {x=0.5,y=0},
-    offset = {x=0,y=30},
-    scale = {x=10, y=10},
-    z_index = 11,
-  })
-  xphb[player][4]=player:hud_add({
-    hud_elem_type = "image",
-    text = "xpshine.png",
-    position = {x=0.5,y=0},
-    offset = {x=-293+(xp*29*2),y=30},
-    scale = {x=10, y=10},
-    z_index = 12,
-  })
-  xphb[player][5]=player:hud_add({
-    hud_elem_type = "text",
-    text = math.floor((tonumber(meta:get_string("xp"))/100)/10)+1,
-    number = 120948349565,
-    position = {x=0.5,y=0},
-    offset = {x=300,y=30},
-    scale = {x=10, y=10},
-    size = {x=2, y=2},
-    z_index = 12,
-  })
-end
 
 minetest.register_on_newplayer(function(player)
   local xpthings = {jumped=0, placed_first=0, dug_first=0, looked_up=0, looked_down=0, chat_message=0, winning=0, lose=0}
@@ -172,42 +104,6 @@ minetest.register_on_newplayer(function(player)
   inv:add_item("main", ItemStack("default:stone_dagger"))
 end)
 
-local achieve_messages = {
-  jumped = "Good job! You have made your first jump.",
-  placed_first = "First item to be placed..",
-  dug_first = "And you picked it back up.",
-  looked_up = "Yup, that's the ceiling..",
-  looked_down = "That's the floor..",
-  chat_message = "Yay! you texted.. nobody.",
-  winning = "You Won!!!",
-  lose = "You lost!",
-}
-
-local rising_boni = {}
-
-local function xp_gain(player, amount)
-  minetest.sound_play("xpding", {
-      to_player = player:get_player_name(),
-      gain = 0.1})
-  amount = amount or 1
-  amount = amount * 20
-  local meta = player:get_meta()
-  if meta:get_string("xp") == "" then -- first time player? give them 0 xp
-    meta:set_string("xp", tostring(amount))
-  else
-    meta:set_string("xp", meta:get_string("xp")+amount)
-  end
-
-  rising_boni[player] = rising_boni[player] or {}
-
-  table.insert(rising_boni[player], {
-    progress = 0,
-    amount = amount/20
-  })
-  set_xp_hud(player)
-end
-
-local d,t,t2
 
 local function free(player)
   if player_in_end[player] then
@@ -216,70 +112,14 @@ local function free(player)
   return true
 end
 
-local function achieved(player, thing)
-  return minetest.deserialize(player:get_meta():get_string("xpthings"))[thing] == 1
-end
-local function achieve(player, thing)
-  if d then
-    player:hud_remove(d)
-    player:hud_remove(t)
-    player:hud_remove(t2)
-  end
-  local things = minetest.deserialize(player:get_meta():get_string("xpthings")) or {}
-  things[thing] = 1
-  player:get_meta():set_string("xpthings", minetest.serialize(things))
-  xp_gain(player, math.random(20))
-  d = player:hud_add({
-    hud_elem_type = "image",
-    text = "gui_formbg.png",
-    position = {x=0.5,y=0},
-    offset = {x=0,y=150},
-    scale = {x=6, y=6},
-    z_index = 111,
-  })
-  local title = "Achievement!"
-  if thing == "lose" then
-    title = "Rare Achievement!"
-  end
-  t = player:hud_add({
-    hud_elem_type = "text",
-    text = title,
-    number = 120941238349565,
-    position = {x=0.5,y=0},
-    offset = {x=0,y=90},
-    scale = {x=10, y=10},
-    size = {x=2, y=2},
-    z_index = 123,
-  })
-  t2 = player:hud_add({
-    hud_elem_type = "text",
-    text = achieve_messages[thing],
-    number = 10000000,
-    position = {x=0.5,y=0},
-    offset = {x=0,y=120},
-    scale = {x=10, y=10},
-    size = {x=1, y=1},
-    z_index = 123,
-  })
-  minetest.after(3, function()
-    if d then
-      player:hud_remove(d)
-      player:hud_remove(t)
-      player:hud_remove(t2)
-      d=nil
-      t=nil
-      t2=nil
-    end
-  end)
-end
 
 local function printf(player, text, delay, scale, func)
   texthud.to_print[player] = text
   texthud.printed[player] = ""
   texthud.delay[player] = delay
   texthud.scale[player] = scale
-  if func and not achieved(player, func) then
-    achieve(player, func)
+  if func and not xp.achieved(player, func) then
+    xp.achieve(player, func)
   end
 end
 
@@ -293,19 +133,19 @@ end
 
 
 minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
-  if not achieved(placer, "placed_first") and free(player) then
-    achieve(placer, "placed_first")
+  if not xp.achieved(placer, "placed_first") and free(player) then
+    xp.achieve(placer, "placed_first")
   end
 end)
 minetest.register_on_dignode(function(pos, oldnode, digger)
-  if not achieved(digger, "dug_first") and free(player) then
-    achieve(digger, "dug_first")
+  if not xp.achieved(digger, "dug_first") and free(player) then
+    xp.achieve(digger, "dug_first")
   end
 end)
 
 minetest.register_on_chat_message(function(name, message)
-  if not achieved(minetest.get_player_by_name(name), "chat_message") and free(player) then
-    achieve(minetest.get_player_by_name(name), "chat_message")
+  if not xp.achieved(minetest.get_player_by_name(name), "chat_message") and free(player) then
+    xp.achieve(minetest.get_player_by_name(name), "chat_message")
   end
 end)
 
@@ -469,8 +309,8 @@ end)
 local morse_message = ". .--. .. -.-. / .... .. -.. -.. . -. / -- . ... ... .- --. . .-.-.- / .... . .-.. .-.. --- / -. . .-. -.. .-.-.-"
 
 controls.register_on_press(function(player, key)
-  if key == "jump" and not achieved(player, "jumped") and free(player) then
-    achieve(player, "jumped")
+  if key == "jump" and not xp.achieved(player, "jumped") and free(player) then
+    xp.achieve(player, "jumped")
   end
   if button_pressed[player] then
     local thing_to_do = dialoge[indexin]
@@ -495,16 +335,16 @@ minetest.register_globalstep(function(dtime)
 
     local pitch = player:get_look_vertical()
 
-    if pitch > 0.99 and not achieved(player, "looked_down") and free(player) then
-      achieve(player, "looked_down")
+    if pitch > 0.99 and not xp.achieved(player, "looked_down") and free(player) then
+      xp.achieve(player, "looked_down")
     end
-    if pitch < -0.99 and not achieved(player, "looked_up") and free(player) then
-      achieve(player, "looked_up")
+    if pitch < -0.99 and not xp.achieved(player, "looked_up") and free(player) then
+      xp.achieve(player, "looked_up")
     end
 
     if timer2 > 0.5 then
       timer2 = 0
-      set_xp_hud(player)
+      xp.set_xp_hud(player)
     end
 
     if rising_boni[player] then
