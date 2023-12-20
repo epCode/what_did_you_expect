@@ -34,9 +34,9 @@ dialoge = { -- I can't spell
   {"You what?", 0.03, 3},
   {"You expected more, huh?", 0.02, 3},
   {"So let me get this straight...", 0.03, 3},
-  {"You anticipated something other than what you got", 0.02, 3},
+  {"You anticipated something\nother than what you got", 0.02, 3},
   {"Right?", 0.04, 3},
-  {"You know, some would call that sort of thing...", 0.02, 3},
+  {"You know, some would call\nthat sort of thing...", 0.02, 3},
   {"...", 0.07, 3},
   {".....", 0.07, 3},
   {"........", 0.07, 3},
@@ -44,7 +44,7 @@ dialoge = { -- I can't spell
   {":)", 0.05, 3},
   {"...", 0.1, 3},
   {"Seriously?", 0.02, 3},
-  {"Why? Arent you bored already?", 0.02, 3},
+  {"Why? Aren't you bored already?", 0.02, 3},
   {"Well I'm tired, leave me alone, please.", 0.02, 3},
   {":|", 0.02, 4},
   {"I have a poem for you;", 0.02, 3},
@@ -55,11 +55,11 @@ dialoge = { -- I can't spell
   {"That it, thats the whole peom..", 0.02, 3},
   {"My own composition I might add.", 0.02, 3},
   {"What's that? I didn't finish it?", 0.02, 3},
-  {"So you expected then for me to-", 0.02, 3},
-  {"nevermind.", 0.02, 3},
-  {"Listen, can you please just go check out another game entry?", 0.02, 3},
+  {"So you're saying you expectations were-", 0.02, 3},
+  {"nevermind.", 0.02, 2},
+  {"Listen, can you please just\ngo check out another game entry?", 0.02, 3},
   {"I hear Jordan is doing something interesting.", 0.02, 3},
-  {"Perhaps Wuzzy will win again, if he's entering.", 0.02, 3},
+  {"Perhaps Wuzzy will win again,\nif he's entering.", 0.02, 3},
   {"...", 0.1, 3},
   {"....", 0.1, 3},
   {"Boo!", 0.02, 10},
@@ -75,7 +75,7 @@ dialoge = { -- I can't spell
   {"I think I might", 0.07, 2},
   {"cry :(", 0.07, 1},
   {"Thank you for at least talking to me.", 0.1, 3},
-  {"I must begone, farewell. I guess I deserve this for such a disappointing surprise", 0.1, 3},
+  {"I must begone, farewell.\nI guess I deserve this for such a\ndisappointing surprise", 0.1, 3},
 }
 
 local function show_help_form(player)
@@ -306,7 +306,7 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 
-local morse_message = ". .--. .. -.-. / .... .. -.. -.. . -. / -- . ... ... .- --. . .-.-.- / .... . .-.. .-.. --- / -. . .-. -.. .-.-.-"
+local morse_message = "-. . ...- . .-. / --. --- -. -. .- / --. .. ...- . / -.-- --- ..- / ..- .--. / -. . ...- . .-. / --. --- -. -. .- / .-.. . - / -.-- --- ..- / -.. --- .-- -."
 
 controls.register_on_press(function(player, key)
   if key == "jump" and not xp.achieved(player, "jumped") and free(player) then
@@ -325,6 +325,7 @@ controls.register_on_press(function(player, key)
   end
 end)
 
+local delay_extra = {}
 
 local timer = 0
 local timer2 = 0
@@ -376,8 +377,8 @@ minetest.register_globalstep(function(dtime)
     if texthud.printed[player] and texthud.printed[player] == morse_message then
       minetest.kick_player(player:get_player_name(), "My condolences, "..player:get_player_name().."; You finished the game with a loss. I'm sorry. Have a good day. Or a day anyway. -Seugy")
     end
-
-    local delay = (texthud.delay[player] or 0.5)
+    delay_extra[player] = delay_extra[player] or 0
+    local delay = (texthud.delay[player] or 0.5) + delay_extra[player]
     local double = 1
 
     if delay and delay == "fast" then
@@ -388,13 +389,18 @@ minetest.register_globalstep(function(dtime)
     if timer+(math.random(-100,100)/100) < delay or not texthud.to_print[player] or not texthud.printed[player] then
       break
     end
+    delay_extra[player] = 0
     timer = 0
-
     if not finished_typing(player) then
       if texthud.id[player] then
         player:hud_remove(texthud.id[player])
       end
-      texthud.printed[player] = texthud.printed[player]..texthud.to_print[player]:sub(#texthud.printed[player]+1, #texthud.printed[player]+double)
+
+      local addend = texthud.to_print[player]:sub(#texthud.printed[player]+1, #texthud.printed[player]+double)
+      if addend == "," or addend == "?" then
+        delay_extra[player] = 1
+      end
+      texthud.printed[player] = texthud.printed[player]..addend
       if double == 1 then
         minetest.sound_play("typesound", {
             to_player = player:get_player_name(),
