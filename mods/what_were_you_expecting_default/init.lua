@@ -14,9 +14,9 @@ local helptext = [[
 Hello! If you are new to Minetest or a long time user, I welcome you.
 When you are ready to play, pull the lever on the North wall. Have fun!!]]
 
-dofile(minetest.get_modpath("default").."/torch.lua")
-dofile(minetest.get_modpath("default").."/tools.lua")
-dofile(minetest.get_modpath("default").."/xp.lua")
+dofile(minetest.get_modpath("what_were_you_expecting_default").."/torch.lua")
+dofile(minetest.get_modpath("what_were_you_expecting_default").."/tools.lua")
+dofile(minetest.get_modpath("what_were_you_expecting_default").."/xp.lua")
 
 
 
@@ -87,7 +87,7 @@ local function show_help_form(player)
     label[3.9,5.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "ps. feel free to turn off the chat with f2, you won't need it"))..[[]
     ]]
 
-	minetest.show_formspec(player:get_player_name(), "default:help_screen", formspec)
+	minetest.show_formspec(player:get_player_name(), "what_were_you_expecting_default:help_screen", formspec)
 end
 
 
@@ -99,9 +99,9 @@ minetest.register_on_newplayer(function(player)
   show_help_form(player)
   inv:set_size("main", 8)
   inv:set_size("craft", 0)
-  player:set_wielded_item(ItemStack("default:torch"))
-  inv:add_item("main", ItemStack("default:stone_pick"))
-  inv:add_item("main", ItemStack("default:stone_dagger"))
+  player:set_wielded_item(ItemStack("what_were_you_expecting_default:torch"))
+  inv:add_item("main", ItemStack("what_were_you_expecting_default:stone_pick"))
+  inv:add_item("main", ItemStack("what_were_you_expecting_default:stone_dagger"))
 end)
 
 
@@ -150,11 +150,11 @@ minetest.register_on_chat_message(function(name, message)
 end)
 
 
-minetest.register_node("default:node", {
+minetest.register_node("what_were_you_expecting_default:node", {
   tiles = {"brick.png"},
   sounds = {footstep = "footstep"},
 })
-minetest.register_node("default:lever", {
+minetest.register_node("what_were_you_expecting_default:lever", {
   tiles = {"lever.png"},
   drawtype = "mesh",
   mesh = "jeija_wall_lever_on.obj",
@@ -167,7 +167,7 @@ minetest.register_node("default:lever", {
     minetest.sound_play("flip", {
         to_player = clicker:get_player_name(),
         gain = 1})
-    minetest.set_node(pos, {name="default:lever_off"})
+    minetest.set_node(pos, {name="what_were_you_expecting_default:lever_off"})
     minetest.after(1, function()
       player_in_end[clicker] = true
       clicker:set_pos(vector.new(0,0,100))
@@ -202,7 +202,7 @@ minetest.register_node("default:lever", {
   end,
 })
 
-minetest.register_node("default:lever_off", {
+minetest.register_node("what_were_you_expecting_default:lever_off", {
   tiles = {"lever.png"},
   drawtype = "mesh",
   mesh = "jeija_wall_lever_off.obj",
@@ -219,8 +219,8 @@ local function set_start_pos(player)
 
   local pos1 = vector.new(-3,-1,-3)
   local pos2 = vector.add(pos1, vector.new(6,4,6))
-  local c_node = minetest.get_content_id("default:node")
-  local c_lever = minetest.get_content_id("default:lever")
+  local c_node = minetest.get_content_id("what_were_you_expecting_default:node")
+  local c_lever = minetest.get_content_id("what_were_you_expecting_default:lever")
 
   -- Read data into LVM
   local vm = minetest.get_voxel_manip()
