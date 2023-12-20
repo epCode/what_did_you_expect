@@ -38,7 +38,7 @@ minetest.register_node("what_were_you_expecting_default:torch", {
 		local wdir = minetest.dir_to_wallmounted(vector.subtract(under, above))
 		local fakestack = itemstack
 		if wdir == 0 then
-			fakestack:set_name("what_were_you_expecting_default:torch_ceiling")
+			return nil
 		elseif wdir == 1 then
 			fakestack:set_name("what_were_you_expecting_default:torch")
 		else
@@ -77,45 +77,4 @@ minetest.register_node("what_were_you_expecting_default:torch_wall", {
 	floodable = true,
 	on_flood = on_flood,
 	on_rotate = false
-})
-
-minetest.register_node("what_were_you_expecting_default:torch_ceiling", {
-	drawtype = "mesh",
-	mesh = "torch_ceiling.obj",
-	tiles = {{
-		    name = "default_torch_on_floor_animated.png",
-		    animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 3.3}
-	}},
-	use_texture_alpha = "clip",
-	paramtype = "light",
-	paramtype2 = "wallmounted",
-	sunlight_propagates = true,
-	walkable = false,
-	light_source = 12,
-	groups = {choppy=2, dig_immediate=3, flammable=1, not_in_creative_inventory=1, attached_node=1, torch=1},
-	drop = "what_were_you_expecting_default:torch",
-	selection_box = {
-		type = "wallmounted",
-		wall_top = {-1/8, -1/16, -5/16, 1/8, 1/2, 1/8},
-	},
-	floodable = true,
-	on_flood = on_flood,
-	on_rotate = false
-})
-
-minetest.register_lbm({
-	name = "what_were_you_expecting_default:3dtorch",
-	nodenames = {"what_were_you_expecting_default:torch", "torches:floor", "torches:wall"},
-	action = function(pos, node)
-		if node.param2 == 0 then
-			minetest.set_node(pos, {name = "what_were_you_expecting_default:torch_ceiling",
-				param2 = node.param2})
-		elseif node.param2 == 1 then
-			minetest.set_node(pos, {name = "what_were_you_expecting_default:torch",
-				param2 = node.param2})
-		else
-			minetest.set_node(pos, {name = "what_were_you_expecting_default:torch_wall",
-				param2 = node.param2})
-		end
-	end
 })

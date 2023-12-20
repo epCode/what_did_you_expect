@@ -1,0 +1,1 @@
+The Models; jeija_wall_lever_on.obj and jeija_wall_lever_off.obj and torch_ceiling.obj and torch_floor.obj and torch_wall.obj are not owen by me but are sourced from various free licensed minetest mods.
