@@ -14,8 +14,6 @@ Don't delete stuff... :(
 
 I do not own the mods; controls, wielded_light, or the code for the torch.
 
-## My thoughts on licenses
 
-
-#######################3
+#######################
 # what_did_you_expect
