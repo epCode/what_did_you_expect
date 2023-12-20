@@ -17,6 +17,19 @@ When you are ready to play, pull the lever on the North wall. Have fun!!]]
 
 dofile(minetest.get_modpath("default").."/torch.lua")
 
+
+minetest.register_tool("default:stone_pick", {
+  description = "Stone Pickaxe\n"..minetest.colorize("#87433b", "A sturdy well crafted pick\npirmarily made for digging softer stone"),
+  inventory_image = "stone_pick.png",
+  wield_scale = {x=2,y=2,z=1.3},
+})
+minetest.register_tool("default:stone_dagger", {
+  description = "Stone Dagger\n"..minetest.colorize("#87433b", "A curiously sharp dagger made from stone"),
+  inventory_image = "stone_dagger.png",
+  wield_scale = {x=2,y=2,z=1.3},
+})
+
+
 dialoge = { -- I can't spell
   {"You win!!", 0.02, 7, "winning"}, -- {string_to_print, average_delay_in_seconds_between_each_char_typed, text scale}
   {"Yay!", 0.02, 5},
@@ -150,6 +163,13 @@ end
 minetest.register_on_newplayer(function(player)
   local xpthings = {jumped=0, placed_first=0, dug_first=0, looked_up=0, looked_down=0, chat_message=0, winning=0, lose=0}
   player:get_meta():set_string("xpthings", minetest.serialize(xpthings))
+  local inv = player:get_inventory()
+  show_help_form(player)
+  inv:set_size("main", 8)
+  inv:set_size("craft", 0)
+  player:set_wielded_item(ItemStack("default:torch"))
+  inv:add_item("main", ItemStack("default:stone_pick"))
+  inv:add_item("main", ItemStack("default:stone_dagger"))
 end)
 
 local achieve_messages = {
@@ -421,12 +441,11 @@ label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "Might w
 
 
 minetest.register_on_joinplayer(function(player)
-  show_help_form(player)
-  player:set_inventory_formspec(theme_inv)
-  player:get_inventory():set_size("main", 8)
-  player:get_inventory():set_size("craft", 0)
 
-  player:set_wielded_item(ItemStack("default:torch"))
+
+
+  player:set_inventory_formspec(theme_inv)
+
   set_start_pos(player)
   player:set_pos(vector.zero())
   minetest.after(0.1, function()
@@ -437,7 +456,7 @@ minetest.register_on_joinplayer(function(player)
 
   local formspec = [[
 			bgcolor[#080808BB;true]
-			listcolors[#beba94;#5A5A5A;#beba94;#beba94;#beba94] ]]
+			listcolors[#beba94;#5A5A5A;#beba94;#beba94;#26251c] ]]
 	local name = player:get_player_name()
 	local info = minetest.get_player_information(name)
 	formspec = formspec .. "background[5,5;2,1;gui_formbg.png;true]"
