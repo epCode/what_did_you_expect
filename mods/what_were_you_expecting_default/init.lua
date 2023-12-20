@@ -378,13 +378,14 @@ minetest.register_globalstep(function(dtime)
       minetest.kick_player(player:get_player_name(), "My condolences, "..player:get_player_name().."; You finished the game with a loss. I'm sorry. Have a good day. Or a day anyway. -Seugy")
     end
     delay_extra[player] = delay_extra[player] or 0
-    local delay = (texthud.delay[player] or 0.5) + delay_extra[player]
+    local delay = (texthud.delay[player] or 0.5)
     local double = 1
 
     if delay and delay == "fast" then
       delay = 0
       double = 10
     end
+    delay = delay + delay_extra[player]
 
     if timer+(math.random(-100,100)/100) < delay or not texthud.to_print[player] or not texthud.printed[player] then
       break
