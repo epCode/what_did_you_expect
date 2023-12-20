@@ -7,6 +7,8 @@ local texthud = {
 }
 local indexin = 1
 local button_pressed = {}
+
+local xphb = {}
 -- Yes, I know my formating is amazing.. I had only like a day and a half to make this.
 
 dofile(minetest.get_modpath("default").."/torch.lua")
@@ -210,6 +212,58 @@ label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "Might w
 
 ]]
 
+local function set_xp_hud(player)
+  local meta = player:get_meta()
+  if meta:get_string("xp") == "" then -- first time player? give them 0 xp
+    meta:set_string("xp", "0")
+  else
+    meta:set_string("xp", meta:get_string("xp")+1)
+  end
+  local xp = (tonumber(meta:get_string("xp"))/100)%10
+  if xphb[player] then -- make sure old hud is gone
+    for i=1, 4 do
+      player:hud_remove(xphb[player][i])
+    end
+  else
+    xphb[player] = {}
+  end
+  minetest.chat_send_all(xp)
+  xphb[player][1]=player:hud_add({
+    hud_elem_type = "image",
+    text = "xpbar_under.png",
+    position = {x=0.5,y=0},
+    offset = {x=0,y=30},
+    scale = {x=10, y=10},
+    z_index = 9,
+  })
+
+  xphb[player][2]=player:hud_add({
+    hud_elem_type = "image",
+    text = "xpbar_inside.png",
+    position = {x=0.5,y=0},
+    offset = {x=-293+(xp*29),y=30},
+    scale = {x=xp, y=10},
+    z_index = 10,
+  })
+  xphb[player][4]=player:hud_add({
+    hud_elem_type = "image",
+    text = "xpshine.png",
+    position = {x=0.5,y=0},
+    offset = {x=-293+(xp*29*2),y=30},
+    scale = {x=10, y=10},
+    z_index = 12,
+  })
+  xphb[player][3]=player:hud_add({
+    hud_elem_type = "image",
+    text = "xpbar.png",
+    position = {x=0.5,y=0},
+    offset = {x=0,y=30},
+    scale = {x=10, y=10},
+    z_index = 11,
+  })
+end
+
+
 minetest.register_on_joinplayer(function(player)
   player:set_inventory_formspec(theme_inv)
   player:get_inventory():set_size("main", 8)
@@ -257,6 +311,7 @@ local timer = 0
 minetest.register_globalstep(function(dtime)
   timer = timer + dtime
   for _,player in pairs(minetest.get_connected_players()) do
+    set_xp_hud(player)
 
     minetest.set_player_privs(player:get_player_name(), {fly=nil, fast = nil})
 
