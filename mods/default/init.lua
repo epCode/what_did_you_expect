@@ -11,6 +11,10 @@ local player_in_end = {}
 local xphb = {}
 -- Yes, I know my formating is amazing.. I had only like a day and a half to make this.
 
+local helptext = [[
+Hello! If you are new to Minetest or a long time user, I welcome you.
+When you are ready to play, pull the lever on the North wall. Have fun!!]]
+
 dofile(minetest.get_modpath("default").."/torch.lua")
 
 dialoge = { -- I can't spell
@@ -69,7 +73,17 @@ dialoge = { -- I can't spell
   {"I must begone, farewell. I guess I deserve this for such a disappointing surprise", 0.1, 3},
 }
 
+local function show_help_form(player)
+  local formspec = [[
+    size[13.5,7.5]
+    hypertext[2,2;9.5,3.5;HelpText;]]..helptext..[[]
+    style_type[hypertext;font=bold;border=false]
+    label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "-Seugy"))..[[]
+    label[3.9,5.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "ps. feel free to turn off the chat with f2, you won't need it"))..[[]
+    ]]
 
+	minetest.show_formspec(player:get_player_name(), "default:help_screen", formspec)
+end
 
 
 local function set_xp_hud(player, num)
@@ -407,6 +421,7 @@ label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "Might w
 
 
 minetest.register_on_joinplayer(function(player)
+  show_help_form(player)
   player:set_inventory_formspec(theme_inv)
   player:get_inventory():set_size("main", 8)
   player:get_inventory():set_size("craft", 0)
