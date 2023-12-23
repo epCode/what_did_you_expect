@@ -5,18 +5,38 @@ local texthud = {
   delay = {},
   scale = {},
 }
+default = {}
 local indexin = 1
 local button_pressed = {}
 local player_in_end = {}
 -- Yes, I know my formating is amazing.. I had only like a day and a half to make this.
 
-local helptext = [[
-Hello! If you are new to Minetest or a long time user, I welcome you.
-When you are ready to play, pull the lever on the North wall. Have fun!!]]
+info_forms = {
+  join = {text=[[
+  Hello! If you are new to Minetest or a long time user, I welcome you.
+  When you are ready to play, pull the lever on the North wall. Have fun!!]]},
+
+  help = {
+    text = [["What Were You Expecting" is a combat/building/puzzle-solving/suvival/rpg game. With so many different aspects to the game, it is difficult to keep everyting balanced. If you are struggling to find out what to do, or are trying to be able to progress and are stuck in the stone age here are some tips for you:]],
+    form = "",
+  },
+
+}
+
+function default.show_info_form(player, form_name)
+  local formspec = [[
+    size[13.5,7.5]
+    hypertext[2,2;9.5,3.5;HelpText;]]..(info_forms[form_name].text or "")..[[]
+    style_type[hypertext;font=bold;border=false]
+    ]]..(info_forms[form_name].form or "")
+
+	minetest.show_formspec(player:get_player_name(), "what_were_you_expecting_default:help_screen", formspec)
+end
 
 dofile(minetest.get_modpath("what_were_you_expecting_default").."/torch.lua")
 dofile(minetest.get_modpath("what_were_you_expecting_default").."/tools.lua")
 dofile(minetest.get_modpath("what_were_you_expecting_default").."/xp.lua")
+dofile(minetest.get_modpath("what_were_you_expecting_default").."/inv.lua")
 
 
 
@@ -78,17 +98,7 @@ dialoge = { -- I can't spell
   {"I must begone, farewell.\nI guess I deserve this for such a\ndisappointing surprise", 0.1, 3},
 }
 
-local function show_help_form(player)
-  local formspec = [[
-    size[13.5,7.5]
-    hypertext[2,2;9.5,3.5;HelpText;]]..helptext..[[]
-    style_type[hypertext;font=bold;border=false]
-    label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "-Seugy"))..[[]
-    label[3.9,5.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "ps. feel free to turn off the chat with f2, you won't need it"))..[[]
-    ]]
 
-	minetest.show_formspec(player:get_player_name(), "what_were_you_expecting_default:help_screen", formspec)
-end
 
 
 
@@ -96,7 +106,7 @@ minetest.register_on_newplayer(function(player)
   local xpthings = {jumped=0, placed_first=0, dug_first=0, looked_up=0, looked_down=0, chat_message=0, winning=0, lose=0}
   player:get_meta():set_string("xpthings", minetest.serialize(xpthings))
   local inv = player:get_inventory()
-  show_help_form(player)
+  default.show_info_form(player, "join")
   inv:set_size("main", 8)
   inv:set_size("craft", 0)
   player:set_wielded_item(ItemStack("what_were_you_expecting_default:torch"))
@@ -266,16 +276,54 @@ minetest.hud_replace_builtin("health",	{
 	offset = { x = 46, y = -123 },
 })
 
+local function button(def)
+
+  local form = ""..
+--[[
+    "image["..
+    (def.pos.x-0.1)..","..
+    (def.pos.y+0.1)..";"..
+    def.size.x..","..
+    def.size.y..";"..
+    def.tex..";"..
+    "false]"..]]
+
+    "image_button["..
+      def.pos.x..","..
+      def.pos.y..";"..
+      def.size.x..","..
+      def.size.y..";"..
+      def.tex..";"..
+      def.name..";"..
+      ";"..
+      "true;"..
+      "false;"..
+      def.tex2.."]"
+
+
+  return form
+end
 
 theme_inv = [[
 size[9,5]
 style_type[label;font=bold;border=false]
 list[current_player;main;0.5,2.1;8,1;]
+]]..
+button({
+  pos={x=9.5, y=0},
+  size={x=1.2, y=1.2},
+  tex="gui_8_button.png^gui_question_mark.png",
+  tex2="gui_8_button_pressed.png^gui_question_mark.png",
+  name="info_help",
+})..
+[[
+tooltip[info_help;Help]
 label[2.75,3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "It looks like you don't have much"))..[[]
 label[2.9,3.3;]]..minetest.formspec_escape(minetest.colorize("#87433b", "Might want to get some more!"))..[[]
 
 ]]
 
+--image_button[9.5,1;1.2,1.2;gui_8_button.png^gui_question_mark.png;info_help;;true;false;gui_8_button_pressed.png^gui_question_mark.png]
 
 
 
