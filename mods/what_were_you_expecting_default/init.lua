@@ -106,7 +106,7 @@ minetest.register_on_newplayer(function(player)
   local xpthings = {jumped=0, placed_first=0, dug_first=0, looked_up=0, looked_down=0, chat_message=0, winning=0, lose=0}
   player:get_meta():set_string("xpthings", minetest.serialize(xpthings))
   local inv = player:get_inventory()
-  default.show_info_form(player, "join")
+  --default.show_info_form(player, "join")
   inv:set_size("main", 8)
   inv:set_size("craft", 0)
   player:set_wielded_item(ItemStack("what_were_you_expecting_default:torch"))
@@ -276,7 +276,7 @@ minetest.hud_replace_builtin("health",	{
 	offset = { x = 46, y = -123 },
 })
 
-local function button(def)
+function default.button(def)
 
   local form = ""..
 --[[
@@ -309,7 +309,7 @@ size[9,5]
 style_type[label;font=bold;border=false]
 list[current_player;main;0.5,2.1;8,1;]
 ]]..
-button({
+default.button({
   pos={x=9.5, y=0},
   size={x=1.2, y=1.2},
   tex="gui_8_button.png^gui_question_mark.png",
